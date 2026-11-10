@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
-
+from .wiki_summary.tool import wiki_summary
 import yaml
 
 # Folder names are intentionally vague to match the tool names students see.
@@ -37,6 +37,7 @@ TOOL_FUNCTIONS = {
     "paper_text": get_arxiv_paper_text,
     # TODO(student): register your new tool here, e.g. "my_tool": my_tool_function,
     # then declare it in artifacts/tools.yaml and run `pytest tests/test_tool_contract.py`.
+    "wiki_summary": wiki_summary,
 }
 
 

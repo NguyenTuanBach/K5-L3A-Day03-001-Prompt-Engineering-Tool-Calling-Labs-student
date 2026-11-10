@@ -16,7 +16,7 @@ from conftest import FakeResponse  # noqa: F401  (you will need it)
 from tools import TOOL_FUNCTIONS  # noqa: F401
 
 TODO = "TODO(student): implement this test"
-
+from tools.wiki_summary.tool import wiki_summary
 
 # ---------------- clarify ----------------
 
@@ -110,13 +110,30 @@ def test_policy_instruction_like_lines_go_to_untrusted_text() -> None:
 #   2. bad / missing input from the model (empty string, wrong type, out-of-enum value)
 #   3. failure path (missing key, HTTP error, timeout) -> returns error dict, does not raise
 
-def test_my_new_tool_happy_path() -> None:
-    pytest.skip(TODO)
+def test_wiki_summary_happy_path_requests_page_and_maps_fields(fake_http) -> None:
+    calls = fake_http(FakeResponse({
+        "title": "Hà Nội", "extract": "Thủ đô...",
+        "content_urls": {"desktop": {"page": "https://vi.wikipedia.org/wiki/Hà_Nội"}},
+    }))
+
+    result = wiki_summary(title="Hà Nội", lang="vi")
+
+    assert calls[0]["url"] == "https://vi.wikipedia.org/api/rest_v1/page/summary/Hà_Nội"
+    assert result == {
+        "title": "Hà Nội", "summary": "Thủ đô...",
+        "url": "https://vi.wikipedia.org/wiki/Hà_Nội",
+    }
 
 
-def test_my_new_tool_bad_input_from_model() -> None:
-    pytest.skip(TODO)
+def test_wiki_summary_bad_input_returns_error_without_request(fake_http) -> None:
+    calls = fake_http(FakeResponse({}))
+
+    assert wiki_summary(title="   ")["error"] == "ValueError"
+    assert wiki_summary(title="Hà Nội", lang="fr")["error"] == "ValueError"
+    assert calls == []
 
 
-def test_my_new_tool_failure_returns_error_dict() -> None:
-    pytest.skip(TODO)
+def test_wiki_summary_http_error_returns_error_dict(fake_http) -> None:
+    fake_http(FakeResponse(status_code=500))
+
+    assert wiki_summary(title="Hà Nội")["error"] == "HTTPError"
