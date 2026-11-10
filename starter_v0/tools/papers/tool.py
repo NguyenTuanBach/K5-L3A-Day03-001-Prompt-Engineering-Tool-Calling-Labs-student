@@ -88,7 +88,7 @@ def arxiv_search(query: str = "", max_results: int = 5, sort_by: str = "relevanc
             summary = _entry_text(entry, "./atom:summary", namespaces).replace("\n", " ")
             entries.append({
                 "arxiv_id": arxiv_id,
-                "title": _entry_text(entry, "./atom:title", namespaces).replace("\n", " "),
+                "title": " ".join(_entry_text(entry, "./atom:title", namespaces).split()),
                 "summary": " ".join(summary.split()),
                 "authors": [_entry_text(author, "./atom:name", namespaces) for author in entry.findall("./atom:author", namespaces)],
                 "published": _entry_text(entry, "./atom:published", namespaces),
