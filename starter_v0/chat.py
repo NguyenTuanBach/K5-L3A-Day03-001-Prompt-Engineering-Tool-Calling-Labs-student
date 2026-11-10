@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -13,6 +14,14 @@ from providers.base import ToolCall
 from tools import TOOL_FUNCTIONS, load_tool_declarations, to_openai_tools
 from versioning import artifact_version_dict, build_artifact_version
 
+
+# Windows consoles / background servers often use cp1252, which cannot print the emoji
+# in our log lines and would crash the agent loop. Force UTF-8 on stdout/stderr.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 ROOT = Path(__file__).parent
 ARTIFACTS_DIR = ROOT / "artifacts"

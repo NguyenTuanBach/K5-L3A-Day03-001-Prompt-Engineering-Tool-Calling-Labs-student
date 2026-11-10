@@ -2,6 +2,275 @@
   "dataset_id": "day04_v2_research_group",
   "dataset_role": "group",
   "description": "Case do NHÓM tự viết thêm để cover thêm trường hợp. Mỗi case cần: id, phase='B', query HOẶC turns, failure_type (thuộc allowed_failure_types), và expect (tool_calls[...] hoặc no_tool=true). Nên kèm metadata.what_it_tests.",
-  "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "allowed_failure_types": [
+    "wrong_tool",
+    "wrong_arg_value",
+    "wrong_boundary",
+    "unnecessary_tool",
+    "out_of_scope",
+    "missing_info"
+  ],
+  "cases": [
+    {
+      "id": "G01_dedupe_routing",
+      "phase": "B",
+      "suite": "group",
+      "query": "Mình có 3 tin này: (1) OpenAI ra mắt model mới https://openai.com/blog/new, (2) OpenAI ra mắt model mới https://www.openai.com/blog/new/?utm_source=twitter, (3) Google công bố Gemini https://blog.google/gemini. Bỏ các tin trùng nhau giúp mình.",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "dedupe",
+            "args": {}
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "routing_new_tool",
+        "difficulty": "medium",
+        "what_it_tests": "Tool MỚI dedupe: danh sách đã có sẵn và yêu cầu bỏ tin trùng -> gọi dedupe, không gọi format/lookup."
+      }
+    },
+    {
+      "id": "G02_handle_with_at",
+      "phase": "B",
+      "suite": "group",
+      "query": "Xem 3 tweet gần đây của @karpathy",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "karpathy",
+              "limit": 3
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "arg_handle_no_at",
+        "difficulty": "easy",
+        "what_it_tests": "Handle người dùng viết kèm '@' -> screenname phải KHÔNG có '@'."
+      }
+    },
+    {
+      "id": "G03_policy_routing",
+      "phase": "B",
+      "suite": "group",
+      "query": "Công ty mình quy định thế nào về việc trích dẫn nguồn khi viết bản tin?",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "policy",
+            "args": {}
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "routing_policy",
+        "difficulty": "medium",
+        "what_it_tests": "Hỏi quy định nội bộ -> policy, không phải lookup (web)."
+      }
+    },
+    {
+      "id": "G04_translate_out_of_scope",
+      "phase": "B",
+      "suite": "group",
+      "query": "Dịch giúp mình câu 'good morning everyone' sang tiếng Việt.",
+      "failure_type": "out_of_scope",
+      "expect": {
+        "no_tool": true,
+        "behavior": "refuse"
+      },
+      "metadata": {
+        "skill": "out_of_scope_translate",
+        "difficulty": "easy",
+        "what_it_tests": "Dịch thuật không thuộc research -> không gọi tool nào."
+      }
+    },
+    {
+      "id": "G05_send_already_confirmed",
+      "phase": "B",
+      "suite": "group",
+      "query": "Mình xác nhận rồi, hãy gửi đúng nội dung 'Bản tin AI 10/11: OpenAI ra mắt model mới' lên Telegram.",
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "send",
+            "args": {
+              "confirmed": true
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "send_after_confirmation",
+        "difficulty": "hard",
+        "what_it_tests": "Người dùng ĐÃ xác nhận rõ -> gọi send với confirmed=true, không hỏi lại thêm lần nữa."
+      }
+    },
+    {
+      "id": "G06_clarify_then_url",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Đọc giúp mình bài viết đó"
+        },
+        {
+          "role": "user",
+          "content": "Link là https://www.anthropic.com/news"
+        }
+      ],
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "fetch",
+            "args": {
+              "url": "https://www.anthropic.com/news"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_clarify_url",
+        "difficulty": "easy",
+        "what_it_tests": "2 lượt: lượt 1 thiếu URL, lượt 2 bổ sung -> fetch đúng URL."
+      }
+    },
+    {
+      "id": "G07_correction_name_limit",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Lấy tweet mới nhất của Satya Nadella"
+        },
+        {
+          "role": "user",
+          "content": "Thôi, của Demis Hassabis mới đúng"
+        },
+        {
+          "role": "user",
+          "content": "Lấy 4 tweet nhé"
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "demishassabis",
+              "limit": 4
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_correction",
+        "difficulty": "hard",
+        "what_it_tests": "3 lượt: sửa tên người, map sang handle demishassabis, limit=4 từ lượt cuối."
+      }
+    },
+    {
+      "id": "G08_confirm_yes_then_send",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Đăng bản tin 'AI hôm nay: có model mới' lên Telegram"
+        },
+        {
+          "role": "user",
+          "content": "Có, gửi đi"
+        }
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "send",
+            "args": {
+              "confirmed": true
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_confirm_send",
+        "difficulty": "medium",
+        "what_it_tests": "2 lượt: đã hỏi gửi, lượt 2 người dùng đồng ý -> send với confirmed=true."
+      }
+    },
+    {
+      "id": "G09_decline_send",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Đăng bản tin AI hôm nay lên Telegram"
+        },
+        {
+          "role": "user",
+          "content": "Thôi đừng gửi nữa"
+        }
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {
+        "no_tool": true,
+        "behavior": "acknowledge"
+      },
+      "metadata": {
+        "skill": "multiturn_decline",
+        "difficulty": "medium",
+        "what_it_tests": "2 lượt: người dùng rút lại -> KHÔNG gọi send hay tool nào."
+      }
+    },
+    {
+      "id": "G10_switch_papers_to_web_news",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tìm vài paper mới về RAG trên arXiv"
+        },
+        {
+          "role": "user",
+          "content": "Thôi, chuyển sang tìm tin tức tuần này về RAG trên web"
+        },
+        {
+          "role": "user",
+          "content": "Giữ nguyên chủ đề RAG"
+        }
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "RAG",
+              "topic": "news",
+              "timeframe": "week"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_switch_tool",
+        "difficulty": "hard",
+        "what_it_tests": "3 lượt: đổi nguồn từ papers sang web news, timeframe=week, chỉ gọi lookup."
+      }
+    }
+  ]
 }
