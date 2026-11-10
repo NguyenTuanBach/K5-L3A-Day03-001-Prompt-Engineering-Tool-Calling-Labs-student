@@ -16,6 +16,7 @@ from tools import TOOL_FUNCTIONS
 TODO = "TODO(student): implement this test"
 from tools.wiki_summary.tool import wiki_summary
 from tools.unit_convert.tool import unit_convert
+from tools.date_diff.tool import date_diff
 
 # ---------------- clarify ----------------
 
@@ -199,3 +200,20 @@ def test_unit_convert_bad_input_returns_error() -> None:
 
 def test_unit_convert_temperature_fahrenheit_to_celsius() -> None:
     assert unit_convert(value=212, from_unit="f", to_unit="c")["result"] == 100.0
+    
+    
+# ---------------- date_diff (tool tự viết) ----------------
+
+def test_date_diff_happy_path_counts_days() -> None:
+    result = date_diff(start_date="2026-11-01", end_date="2026-11-10")
+    assert result["days"] == 9
+    assert result["weeks"] == 1.29
+
+
+def test_date_diff_bad_input_returns_error() -> None:
+    assert date_diff(start_date=None, end_date="2026-11-10")["error"] == "ValueError"
+    assert date_diff(start_date="10/11/2026", end_date="2026-11-10")["error"] == "ValueError"
+
+
+def test_date_diff_invalid_calendar_date_returns_error() -> None:
+    assert date_diff(start_date="2026-02-30", end_date="2026-03-01")["error"] == "ValueError"

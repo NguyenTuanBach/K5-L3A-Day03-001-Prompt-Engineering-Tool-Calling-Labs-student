@@ -19,6 +19,7 @@ from .lookup.tool import web_search
 
 from .wiki_summary.tool import wiki_summary
 from .unit_convert.tool import unit_convert
+from .date_diff.tool import date_diff
 
 # NOTE (starter_v0): tool names here are intentionally vague. These keys are the
 # names the model sees AND the names data/eval_base.json + data/eval_research_extension.json
@@ -40,6 +41,7 @@ TOOL_FUNCTIONS = {
     # then declare it in artifacts/tools.yaml and run `pytest tests/test_tool_contract.py`.
     "wiki_summary": wiki_summary,
     "unit_convert": unit_convert,
+    "date_diff": date_diff,
 }
 
 

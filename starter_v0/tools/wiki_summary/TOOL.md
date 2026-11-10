@@ -8,5 +8,3 @@ inputs: [title, lang]
 outputs: [title, summary, url]
 side_effect: false
 ---
-
-Lấy đoạn tóm tắt một bài Wikipedia. Không cần API key.
