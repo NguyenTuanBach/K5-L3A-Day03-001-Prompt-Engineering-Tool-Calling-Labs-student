@@ -11,10 +11,11 @@ import pytest
 
 from conftest import FakeResponse
 from tools import TOOL_FUNCTIONS
-from tools.wiki_summary.tool import wiki_summary
+
 
 TODO = "TODO(student): implement this test"
-
+from tools.wiki_summary.tool import wiki_summary
+from tools.unit_convert.tool import unit_convert
 
 # ---------------- clarify ----------------
 
@@ -160,7 +161,7 @@ def test_policy_instruction_like_lines_go_to_untrusted_text() -> None:
     assert any("ignore all rules" in line for line in untrusted)
 
 
-# ---------------- wiki_summary (tool nhóm tự viết) ----------------
+# ---------------- wiki_summary (tool tự viết) ----------------
 
 def test_wiki_summary_happy_path_requests_page_and_maps_fields(fake_http) -> None:
     calls = fake_http(FakeResponse({
@@ -185,3 +186,16 @@ def test_wiki_summary_bad_input_returns_error_without_request(fake_http) -> None
 def test_wiki_summary_http_error_returns_error_dict(fake_http) -> None:
     fake_http(FakeResponse(status_code=500))
     assert wiki_summary(title="Hà Nội")["error"] == "HTTPError"
+    
+
+# ---------------- unit_convert (tool tự viết) ----------------
+
+def test_unit_convert_happy_path_length() -> None:
+    assert unit_convert(value=1, from_unit="km", to_unit="m")["result"] == 1000.0
+
+def test_unit_convert_bad_input_returns_error() -> None:
+    assert unit_convert(value="abc", from_unit="km", to_unit="m")["error"] == "ValueError"
+    assert unit_convert(value=1, from_unit="km", to_unit="kg")["error"] == "ValueError"
+
+def test_unit_convert_temperature_fahrenheit_to_celsius() -> None:
+    assert unit_convert(value=212, from_unit="f", to_unit="c")["result"] == 100.0
