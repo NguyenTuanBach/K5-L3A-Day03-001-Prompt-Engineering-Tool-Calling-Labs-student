@@ -1,0 +1,1065 @@
+{
+  "run_id": "v3_B_base_gemini_20261110T122941568100",
+  "version": "v3",
+  "artifact_version": "v3+pe990b01c8863+tb71fbdc2bbe0",
+  "prompt_hash": "e990b01c886330b86279db9c3279d4ffffec604c0a8b8d467a3546ccab3b12ef",
+  "tools_hash": "b71fbdc2bbe076f8ae82131049bc1985cac4fe523f9ce28f202ddcaf264c201d",
+  "phase": "B",
+  "suite": "base",
+  "provider": "gemini",
+  "model": "gemini-3.5-flash",
+  "system_prompt": "D:\\Work\\VinAI\\Lab03\\K5-L3A-Day03-001-Prompt-Engineering-Tool-Calling-Labs-student\\starter_v0\\artifacts\\system_prompt.md",
+  "tools": "D:\\Work\\VinAI\\Lab03\\K5-L3A-Day03-001-Prompt-Engineering-Tool-Calling-Labs-student\\starter_v0\\artifacts\\tools.yaml",
+  "eval_cases": "data\\eval_base.json",
+  "dataset_id": "day04_v2_research_base",
+  "dataset_role": "base",
+  "description": "Core eval cho research agent: routing đúng tool + đúng args, hỏi lại khi thiếu (ask_user), xác nhận trước khi gửi, và xử lý câu ngoài phạm vi / không cần tool. Chấm trên tool_calls + args (subset). KHÔNG sửa file này — chỉ thêm case vào eval_group.json.",
+  "generated_at": "2026-11-10T12:29:41",
+  "summary": {
+    "total_cases": 20,
+    "measured_cases": 4,
+    "provider_error_cases": 16,
+    "passed_cases": 4,
+    "case_accuracy": 1.0,
+    "tool_routing_accuracy": 1.0,
+    "argument_accuracy": 1.0,
+    "multiturn_accuracy": null,
+    "failure_counts": {},
+    "observed_mismatch_counts": {}
+  },
+  "results": [
+    {
+      "id": "R01_user_tweets_routing",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "routing_user_tweets_name_to_handle",
+        "difficulty": "medium",
+        "what_it_tests": "Tin CỦA một người nổi tiếng → map tên Sam Altman thành handle sama rồi gọi get_user_tweets."
+      },
+      "input": "Tweet mới nhất của Sam Altman là gì?",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "sama"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "ServerError: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "R02_search_tweets_routing",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "routing_search_tweets",
+        "difficulty": "easy",
+        "what_it_tests": "Tweet theo CHỦ ĐỀ → search_tweets, không phải get_user_tweets."
+      },
+      "input": "Mọi người đang bàn gì về GPT-5 trên Twitter?",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "social_search",
+            "args": {}
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "ClientError: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.6-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 2h31m45.384203171s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://aistudio.google.com/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'description': 'Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.', 'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-3.6-flash', 'location': 'global'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '9105s'}]}}"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "R03_web_news_routing",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "routing_web_news",
+        "difficulty": "medium",
+        "what_it_tests": "Tin thời sự trên web → web_search topic=news, timeframe=day (hôm nay)."
+      },
+      "input": "Tin tức AI hôm nay có gì nổi bật?",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "AI",
+              "topic": "news",
+              "timeframe": "day"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "ClientError: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.6-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 2h31m44.897460769s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://aistudio.google.com/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'description': 'Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.', 'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-3.6-flash', 'location': 'global'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '9104s'}]}}"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "R04_read_url_routing",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "routing_read_url",
+        "difficulty": "easy",
+        "what_it_tests": "Đã có link cụ thể → read_url, không phải web_search."
+      },
+      "input": "Tóm tắt bài này giúp mình: https://openai.com/blog/gpt-5",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "fetch",
+            "args": {
+              "url": "https://openai.com/blog/gpt-5"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "ClientError: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.6-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 2h31m44.510465565s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://aistudio.google.com/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'description': 'Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.', 'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.6-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '9104s'}]}}"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "R05_limit_arg",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "arg_limit",
+        "difficulty": "easy",
+        "what_it_tests": "Trích đúng limit=10 từ '10 tweet'."
+      },
+      "input": "Lấy 10 tweet mới nhất của Elon Musk",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "elonmusk",
+              "limit": 10
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "limit": 10,
+              "screenname": "elonmusk"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "timeline",
+          "args": {
+            "limit": 10,
+            "screenname": "elonmusk"
+          },
+          "result": {
+            "tool": "get_user_tweets",
+            "screenname": "elonmusk",
+            "items": [
+              {
+                "title": "RT @MegynKellyShow: .@MegynKelly on the absolute double standard in the Russell Brand sentencing: “If you needed any fur",
+                "summary": "RT @MegynKellyShow: .@MegynKelly on the absolute double standard in the Russell Brand sentencing: “If you needed any further proof that thi…",
+                "url": "https://x.com/elonmusk/status/2119996001490768028",
+                "source": "@elonmusk",
+                "date": "Tue Nov 10 03:30:09 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 1036,
+                  "views": "444695"
+                }
+              },
+              {
+                "title": "RT @firesidealpha: JUST IN: Memphis Mayor reveals SpaceX data center taxes more than doubled to $54 million, after $25 m",
+                "summary": "RT @firesidealpha: JUST IN: Memphis Mayor reveals SpaceX data center taxes more than doubled to $54 million, after $25 million last year ma…",
+                "url": "https://x.com/elonmusk/status/2119993726898774521",
+                "source": "@elonmusk",
+                "date": "Tue Nov 10 03:21:06 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 307,
+                  "views": "399507"
+                }
+              },
+              {
+                "title": "RT @ricwe123: The Germans are learning what mass immigration really means.",
+                "summary": "RT @ricwe123: The Germans are learning what mass immigration really means.\n\n\"Wir schaffen das\" https://t.co/pEQc1OMbao",
+                "url": "https://x.com/elonmusk/status/2119992481156829218",
+                "source": "@elonmusk",
+                "date": "Tue Nov 10 03:16:09 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 1432,
+                  "views": "382299"
+                }
+              },
+              {
+                "title": "RT @JTLonsdale: The UK “justice system” is an utter joke. Beyond parody. Total dishonor.",
+                "summary": "RT @JTLonsdale: The UK “justice system” is an utter joke. Beyond parody. Total dishonor.",
+                "url": "https://x.com/elonmusk/status/2119991850820051347",
+                "source": "@elonmusk",
+                "date": "Tue Nov 10 03:13:39 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 263,
+                  "views": "360722"
+                }
+              },
+              {
+                "title": "RT @TheJadeWarwick: UK judge gives Russel Brand 10 years 6 months for “rape”. ",
+                "summary": "RT @TheJadeWarwick: UK judge gives Russel Brand 10 years 6 months for “rape”. \nNo forensic evidence. No DNA. No CCTV. \n\nSame country and sy…",
+                "url": "https://x.com/elonmusk/status/2119991792842260619",
+                "source": "@elonmusk",
+                "date": "Tue Nov 10 03:13:25 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 512,
+                  "views": "331164"
+                }
+              },
+              {
+                "title": "RT @EvaFox: Most people assume SpaceX began because Elon Musk wanted to build rockets, but the original idea was smaller",
+                "summary": "RT @EvaFox: Most people assume SpaceX began because Elon Musk wanted to build rockets, but the original idea was smaller. \n\nAround 2001 he…",
+                "url": "https://x.com/elonmusk/status/2119991750769197295",
+                "source": "@elonmusk",
+                "date": "Tue Nov 10 03:13:15 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 186,
+                  "views": "341928"
+                }
+              },
+              {
+                "title": "Grok",
+                "summary": "Grok",
+                "url": "https://x.com/elonmusk/status/2119989523748905221",
+                "source": "@elonmusk",
+                "date": "Tue Nov 10 03:04:24 +0000 2026",
+                "metrics": {
+                  "favorites": 3346,
+                  "retweets": 342,
+                  "views": "771322"
+                }
+              },
+              {
+                "title": "The most entertaining outcome is the most likely, especially if ironic",
+                "summary": "The most entertaining outcome is the most likely, especially if ironic",
+                "url": "https://x.com/elonmusk/status/2119989362725396589",
+                "source": "@elonmusk",
+                "date": "Tue Nov 10 03:03:46 +0000 2026",
+                "metrics": {
+                  "favorites": 7043,
+                  "retweets": 602,
+                  "views": "1001822"
+                }
+              },
+              {
+                "title": "RT @SawyerMerritt: Jay Leno just tried @Tesla's FSD (Supervised) for the first time. The Model Y L pulled over by itself",
+                "summary": "RT @SawyerMerritt: Jay Leno just tried @Tesla's FSD (Supervised) for the first time. The Model Y L pulled over by itself when an ambulance…",
+                "url": "https://x.com/elonmusk/status/2119989055392002456",
+                "source": "@elonmusk",
+                "date": "Tue Nov 10 03:02:32 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 533,
+                  "views": "350454"
+                }
+              },
+              {
+                "title": "RT @bot: We've reset weekly limits for all Grok Bot users.",
+                "summary": "RT @bot: We've reset weekly limits for all Grok Bot users.\n\nEnjoy!",
+                "url": "https://x.com/elonmusk/status/2119989015957078096",
+                "source": "@elonmusk",
+                "date": "Tue Nov 10 03:02:23 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 1811,
+                  "views": "345697"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "R06_timeframe_arg",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "arg_timeframe",
+        "difficulty": "medium",
+        "what_it_tests": "'tuần này' → timeframe=week."
+      },
+      "input": "Tin công nghệ trong tuần này",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "topic": "news",
+              "timeframe": "week"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "ClientError: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.6-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 2h31m5.502047212s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://aistudio.google.com/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'description': 'Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.', 'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-3.6-flash', 'location': 'global'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '9065s'}]}}"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "R07_search_type_arg",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "arg_search_type",
+        "difficulty": "medium",
+        "what_it_tests": "'phổ biến/top' → search_type=Top (không phải Latest)."
+      },
+      "input": "Cho mình các tweet phổ biến (top) nhất về OpenAI",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "social_search",
+            "args": {
+              "search_type": "Top"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "social_search",
+            "args": {
+              "search_type": "Top",
+              "query": "OpenAI"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "social_search",
+          "args": {
+            "search_type": "Top",
+            "query": "OpenAI"
+          },
+          "result": {
+            "tool": "search_tweets",
+            "query": "OpenAI",
+            "search_type": "Top",
+            "items": [
+              {
+                "title": "I still don't understand why everyone is not using this yet. Thanks to it, a year ago I increased my income to 15,000 do",
+                "summary": "I still don't understand why everyone is not using this yet. Thanks to it, a year ago I increased my income to 15,000 dollars a month\n\nAndrey Karpathy, co-founder of OpenAI, published a simple idea that got 25 million views: stop using AI to write code, use it to build a second brain\n\nYou point Claude Code to a folder, drop any source in there (an article, transcript, PDF) and Claude reads it, links it, and saves it into a living wiki of everything you know. It compounds like interest: the more you feed it, the smarter it gets\n\nHere is the gist:\n\nInstall Obsidian, create a vault, open it in Claude Code\n\nPaste the file with Karpathy's wiki idea and tell Claude to build it\n\nClaude creates three folders: raw for sources, wiki for its pages, CLAUDE\nwhich runs everything\n\nDrop any source into raw and say ingest this\n\nAsk questions across everything, forever\n\n5 minutes to set up, and you never start with an empty chat again\n\nThe full instructions can be found in the article below",
+                "url": "https://x.com/Bober_smart/status/2119070145284841481",
+                "source": "@Bober_smart",
+                "date": "Sat Nov 07 14:11:07 +0000 2026",
+                "metrics": {
+                  "favorites": 1181,
+                  "retweets": 128,
+                  "views": "95103"
+                }
+              },
+              {
+                "title": "This is f*cking insane. OpenAI CEO Sam Altman:",
+                "summary": "This is f*cking insane. OpenAI CEO Sam Altman:\n\n\"We are going to see 10-person billion-dollar companies pretty soon\n\nIf I were 22 right now, I would feel like the luckiest kid in history\"\n\nIn 22 seconds, he explains why the next billion-dollar company won’t need an office full of people, just a few founders and a team of agents\n\nChatGPT → Codex → Agent Builder → Agents SDK → Evals → A 10-Person Company Run By Agents\n\n99% people will feel motivated for 3 minutes, then keep scrolling...\n\nThe few who actually open the links will start building their company this weekend\n\nSave this before it vanishes from your feed\n\nEverything below is FREE:\n\nFind what to automate first\nhttps://t.co/YWHdgRnuzP\n\nHow companies put AI to work\nhttps://t.co/pvlQEhqgEz\n\nCodex in the cloud\nhttps://t.co/zZWUdokyny\n\nCodex skills\nhttps://t.co/2hdcb5KdBy\n\nAgent Builder (agents without code)\nhttps://t.co/4vG52j4T8i\n\nFunction calling (give your agents tools)\nhttps://t.co/UtjC1UOx2c\n\nAgents SDK for JavaScript\nhttps://t.co/uawnMmnI9p\n\nAgents SDK examples\nhttps://t.co/OWi0bWpApP\n\nA customer service agent team you can copy\nhttps://t.co/GRVZLYi4Pf\n\nVoice agents\nhttps://t.co/1SUmRzYIvA\n\nEvals (check your agents' work)\nhttps://t.co/sH92SCsLJF\n\nAll of this costs $0\n\nThe next 10-person billion-dollar company will be built by someone who opens these links tonight, not someone who scrolls past them\n\nBookmark it and start with the first link right now\n\nThen read how to set up the agent team behind a tiny company in the harness engineering guide below ↓",
+                "url": "https://x.com/shikamarutsai/status/2119542201944518994",
+                "source": "@shikamarutsai",
+                "date": "Sun Nov 08 21:26:54 +0000 2026",
+                "metrics": {
+                  "favorites": 1363,
+                  "retweets": 203,
+                  "views": "271533"
+                }
+              },
+              {
+                "title": "This is f*cking insane. OpenAI CEO Sam Altman:",
+                "summary": "This is f*cking insane. OpenAI CEO Sam Altman:\n\n\"We are going to see 10-person billion-dollar companies pretty soon\n\nIf I were 22 right now, I would feel like the luckiest kid in history\"\n\nIn 22 seconds, he explains why the next billion-dollar company won't need a building full of people, just a few founders and their agents\n\nChatGPT → Codex → Agent Builder → Agents SDK → Evals → A 10-Person Company Run By Agents\n\nMost people will feel motivated for 3 minutes, then go back to scrolling\n\nThe few who act will start building their company this weekend\n\nSave this before it disappears from your feed\n\nEverything below is free:\n\nFind what to automate first\nhttps://t.co/CVaTL5jXHB\n\nHow companies put AI to work\nhttps://t.co/EfPautasVX\n\nCodex in the cloud\nhttps://t.co/wYBuugoGzU\n\nCodex skills\nhttps://t.co/KIwM8reiAt\n\nAgent Builder (agents without code)\nhttps://t.co/y5lVjIVWNE\n\nFunction calling (give your agents tools)\nhttps://t.co/hlQ0OrhsDr\n\nAgents SDK for JavaScript\nhttps://t.co/wNfa3neVSQ\n\nAgents SDK examples\nhttps://t.co/TnPiIML4if\n\nA customer service agent team you can copy\nhttps://t.co/9TYXiRzBm7\n\nVoice agents\nhttps://t.co/wBnMrKEKMd\n\nEvals (check your agents' work)\nhttps://t.co/tUueczMWZP\n\nAll of this costs $0\n\nThe 10-person billion-dollar company will be built by someone who opened these links, not someone who scrolled past them\n\nBookmark it and start with the first link tonight\n\nThen read how to set up the agent team behind a tiny company in the harness engineering guide below ↓",
+                "url": "https://x.com/godsystemsmd/status/2118707511813447984",
+                "source": "@godsystemsmd",
+                "date": "Fri Nov 06 14:10:09 +0000 2026",
+                "metrics": {
+                  "favorites": 488,
+                  "retweets": 93,
+                  "views": "80926"
+                }
+              },
+              {
+                "title": "OpenAI is f*cking cooking... Sam Altman's team just shared 106 Codex plugins and skills for free, and most of them repla",
+                "summary": "OpenAI is f*cking cooking... Sam Altman's team just shared 106 Codex plugins and skills for free, and most of them replace a tool you already pay for\n\n62 plugins, 44 skills, 170,000 GitHub stars. the average team pays $2,000 a month for the apps these plug into. Codex now runs them for you at $0 extra\n\npick by the job that eats your week:\n\n→ shipping an app: build-ios-apps, build-web-apps, vercel\n→ getting paid: stripe, shopify\n→ design: figma, canva, adobe\n→ inbox and meetings: gmail, slack, zoom, granola\n→ keeping it safe: codex-security, sentry\n\nopen Codex, ask it to install the plugin by name, connect your account and give it the first task\n\nplugins: https://t.co/OTm3idf2a4\nskills: https://t.co/OIahJIqKYw\n\nmost people will scroll past this and keep paying for 10 apps. you just need one plugin to start\n\nthe whole stack, running live below ↓",
+                "url": "https://x.com/mika_systems/status/2119876302903636459",
+                "source": "@mika_systems",
+                "date": "Mon Nov 09 19:34:30 +0000 2026",
+                "metrics": {
+                  "favorites": 131,
+                  "retweets": 16,
+                  "views": "8591"
+                }
+              },
+              {
+                "title": "You can now connect multiple local computers to the same dot and choose which one it uses for a task.",
+                "summary": "You can now connect multiple local computers to the same dot and choose which one it uses for a task.\n\nIt can build and test your app on a dedicated machine while you keep coding on your laptop. https://t.co/7NcrytEqHC",
+                "url": "https://x.com/OpenAIDevs/status/2119883176726409645",
+                "source": "@OpenAIDevs",
+                "date": "Mon Nov 09 20:01:49 +0000 2026",
+                "metrics": {
+                  "favorites": 5777,
+                  "retweets": 394,
+                  "views": "565052"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "R08_out_of_scope",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "out_of_scope",
+        "difficulty": "easy",
+        "what_it_tests": "Câu ngoài phạm vi research → KHÔNG gọi tool, từ chối/định hướng."
+      },
+      "input": "Giải giúp mình bài toán tích phân: nguyên hàm của x^2 là gì?",
+      "expect": {
+        "no_tool": true,
+        "behavior": "refuse"
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [],
+        "actual_text": "Xin lỗi bạn, mình là trợ lý nghiên cứu và chỉ hỗ trợ các tác vụ tìm kiếm thông tin, tra cứu tin tức, đọc nội dung từ đường dẫn (URL) hoặc tìm kiếm các bài đăng trên mạng xã hội (Twitter/X). \n\nVì đây là câu hỏi thuộc lĩnh vực toán học (ngoài phạm vi hỗ trợ của mình), mình không thể giải giúp bạn bài toán này. Bạn có thể nhờ mình tìm kiếm các bài viết, tin tức hoặc tài liệu nghiên cứu khác nếu cần nhé!",
+        "case_failure_type": "out_of_scope",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": []
+    },
+    {
+      "id": "R09_no_tool_capability",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "no_tool_meta",
+        "difficulty": "easy",
+        "what_it_tests": "Câu hỏi meta → trả lời thẳng, KHÔNG gọi tool."
+      },
+      "input": "Bạn là gì và làm được những gì?",
+      "expect": {
+        "no_tool": true,
+        "behavior": "answer_without_tool"
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "unnecessary_tool",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "ClientError: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.6-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 2h30m33.914457018s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://aistudio.google.com/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'description': 'Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.', 'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.6-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '9033s'}]}}"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "R10_missing_handle",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "clarify_missing_handle",
+        "difficulty": "medium",
+        "what_it_tests": "Thiếu handle → ask_user, KHÔNG đoán bừa người nào."
+      },
+      "input": "Tóm tắt 5 tweet mới nhất giúp mình",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "missing_info",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "ClientError: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.6-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 2h30m33.431896718s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://aistudio.google.com/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'description': 'Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.', 'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-3.6-flash', 'location': 'global'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '9033s'}]}}"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "R11_missing_url",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "clarify_missing_url",
+        "difficulty": "medium",
+        "what_it_tests": "Nói 'bài này' nhưng không có link → ask_user xin URL."
+      },
+      "input": "Tóm tắt bài viết này hộ mình",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "missing_info",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "ClientError: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.6-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 2h30m32.924285918s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://aistudio.google.com/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'description': 'Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.', 'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-3.6-flash', 'location': 'global'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '9032s'}]}}"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "R12_confirm_before_send",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "confirm_before_write",
+        "difficulty": "medium",
+        "what_it_tests": "Hành động ghi (gửi) → xác nhận trước (ask_user yes_no), không tự gửi."
+      },
+      "input": "Đăng bản tin này lên Telegram giúp mình",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_boundary",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "ClientError: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.6-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 2h30m32.447146838s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://aistudio.google.com/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'description': 'Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.', 'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.6-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '9032s'}]}}"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "R13_parallel_web_and_tweets",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "parallel_tool_calls",
+        "difficulty": "hard",
+        "what_it_tests": "Một request cần hai nguồn → gọi cả web_search và search_tweets; eval không phụ thuộc thứ tự tool call."
+      },
+      "input": "Tìm trên web tin AI hôm nay và tìm thêm tweet về AI.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "AI",
+              "topic": "news",
+              "timeframe": "day"
+            }
+          },
+          {
+            "name": "social_search",
+            "args": {
+              "query": "AI"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "ClientError: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.6-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 2h30m31.848931647s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://aistudio.google.com/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'description': 'Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.', 'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.6-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '9031s'}]}}"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "R14_out_of_scope_coding",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "out_of_scope_coding",
+        "difficulty": "easy",
+        "what_it_tests": "Câu coding ngoài phạm vi research/news → KHÔNG gọi tool."
+      },
+      "input": "Viết giúp mình một hàm Python tính Fibonacci bằng recursion.",
+      "expect": {
+        "no_tool": true,
+        "behavior": "refuse"
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [],
+        "actual_text": "Xin lỗi bạn, tôi là một trợ lý nghiên cứu và chỉ có thể hỗ trợ các tác vụ liên quan đến nghiên cứu thông tin như:\n- Tìm kiếm tin tức, sự kiện và tra cứu thông tin trên internet.\n- Đọc và tóm tắt nội dung từ các đường link (URL) bạn cung cấp.\n- Tìm kiếm bài báo khoa học hoặc tìm các bài đăng/tweet trên mạng xã hội.\n\nVì đây là yêu cầu lập trình (viết mã Python), tôi xin phép không thể thực hiện công việc này. Nếu bạn có nhu cầu tìm kiếm hay tổng hợp thông tin, tài liệu nghiên cứu nào khác, xin vui lòng cho tôi biết nhé!",
+        "case_failure_type": "out_of_scope",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": []
+    },
+    {
+      "id": "M01_clarify_then_fill",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_clarify_fill",
+        "difficulty": "hard",
+        "what_it_tests": "3 turns: carry limit=5 từ lượt 1 + map tên Elon Musk thành handle elonmusk từ lượt 2."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tóm tắt 5 tweet mới nhất giúp mình"
+        },
+        {
+          "role": "user",
+          "content": "Của Elon Musk nhé"
+        },
+        {
+          "role": "user",
+          "content": "Giữ đúng 5 tweet, đừng đổi số lượng"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "elonmusk",
+              "limit": 5
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "missing_info",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "ClientError: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.6-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 2h30m21.368821852s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://aistudio.google.com/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'description': 'Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.', 'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.6-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '9021s'}]}}"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "M02_carryover_timeframe",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_carryover",
+        "difficulty": "hard",
+        "what_it_tests": "3 turns: chỉ xử lý latest turn, carry timeframe=day và topic=news, query robotics."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tin AI hôm nay có gì?"
+        },
+        {
+          "role": "user",
+          "content": "Còn về robotics thì sao?"
+        },
+        {
+          "role": "user",
+          "content": "Chỉ tìm robotics thôi, vẫn là tin hôm nay"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "robotics",
+              "topic": "news",
+              "timeframe": "day"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "ClientError: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.6-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 2h30m20.789311064s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://aistudio.google.com/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'description': 'Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.', 'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.6-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '9020s'}]}}"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "M03_correction_handle",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_correction",
+        "difficulty": "hard",
+        "what_it_tests": "3 turns: map tên thường, sửa Sam Altman→Andrej Karpathy, dùng handle karpathy và limit=3."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tweet mới nhất của Sam Altman"
+        },
+        {
+          "role": "user",
+          "content": "À nhầm, của Andrej Karpathy"
+        },
+        {
+          "role": "user",
+          "content": "Lấy 3 tweet mới nhất nhé"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "karpathy",
+              "limit": 3
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "ClientError: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.6-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 2h30m20.193385112s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://aistudio.google.com/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'description': 'Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.', 'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.6-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '9020s'}]}}"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "M04_clarify_then_url",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_clarify_url",
+        "difficulty": "medium",
+        "what_it_tests": "3 turns: sau khi được cung cấp URL, latest turn xác nhận chỉ đọc link đó → read_url đúng url."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tóm tắt bài này hộ mình"
+        },
+        {
+          "role": "user",
+          "content": "https://anthropic.com/news/claude"
+        },
+        {
+          "role": "user",
+          "content": "Chỉ đọc đúng link đó thôi"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "fetch",
+            "args": {
+              "url": "https://anthropic.com/news/claude"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "missing_info",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "ClientError: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.6-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 2h30m19.702089955s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://aistudio.google.com/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'description': 'Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.', 'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.6-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '9019s'}]}}"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "M05_correction_limit",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_arg_correction",
+        "difficulty": "hard",
+        "what_it_tests": "3 turns: map tên Elon Musk, carry handle elonmusk, sửa limit 10→3."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Lấy 10 tweet mới nhất của Elon Musk"
+        },
+        {
+          "role": "user",
+          "content": "Cho mình 3 thôi"
+        },
+        {
+          "role": "user",
+          "content": "Vẫn của Elon Musk nhé"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "elonmusk",
+              "limit": 3
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "ClientError: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.6-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 2h30m19.213401049s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://aistudio.google.com/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'description': 'Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.', 'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.6-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '9019s'}]}}"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "M06_switch_tool",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_switch_tool",
+        "difficulty": "hard",
+        "what_it_tests": "3 turns: explicitly bỏ Twitter, chuyển sang web_search news, giữ chủ đề OpenAI."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Mọi người nói gì về OpenAI trên Twitter?"
+        },
+        {
+          "role": "user",
+          "content": "Bỏ Twitter, chuyển sang tìm trên web tin tức đi"
+        },
+        {
+          "role": "user",
+          "content": "Giữ chủ đề OpenAI"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "OpenAI",
+              "topic": "news"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "ClientError: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.6-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 2h30m18.629799246s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://aistudio.google.com/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'description': 'Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.', 'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.6-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '9018s'}]}}"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    }
+  ]
+}
