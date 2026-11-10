@@ -15,6 +15,8 @@ from tools import TOOL_FUNCTIONS
 from tools.wiki_summary.tool import wiki_summary
 from tools.unit_convert.tool import unit_convert
 from tools.date_diff.tool import date_diff
+from tools.text_stats.tool import text_stats
+
 
 # ---------------- clarify ----------------
 
@@ -209,3 +211,20 @@ def test_date_diff_bad_input_returns_error() -> None:
 
 def test_date_diff_invalid_calendar_date_returns_error() -> None:
     assert date_diff(start_date="2026-02-30", end_date="2026-03-01")["error"] == "ValueError"
+    
+# ---------------- test_text (tool tự viết) ----------------
+
+def test_text_stats_happy_path_counts_words_and_characters() -> None:
+    result = text_stats(text="Hà Nội đẹp", chars_per_minute=10)
+    assert result["words"] == 3
+    assert result["characters"] == 10
+    assert result["reading_minutes"] == 1.0
+
+
+def test_text_stats_bad_input_returns_error() -> None:
+    assert text_stats(text="   ")["error"] == "ValueError"
+    assert text_stats(text=123)["error"] == "ValueError"
+
+
+def test_text_stats_zero_speed_returns_error_without_dividing() -> None:
+    assert text_stats(text="abc", chars_per_minute=0)["error"] == "ValueError"
