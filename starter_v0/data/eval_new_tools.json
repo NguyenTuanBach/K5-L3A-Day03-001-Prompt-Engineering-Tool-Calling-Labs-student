@@ -1,0 +1,175 @@
+{
+  "dataset_id": "day03_new_tools",
+  "dataset_role": "extension",
+  "description": "Case kiểm tra routing/args cho 3 tool mới của nhóm: current_time, extract_links, cite_source.",
+  "allowed_failure_types": [
+    "wrong_tool",
+    "wrong_arg_value",
+    "wrong_boundary",
+    "unnecessary_tool",
+    "out_of_scope",
+    "missing_info"
+  ],
+  "cases": [
+    {
+      "id": "N01_current_time_now",
+      "phase": "B",
+      "suite": "extension",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "current_time",
+            "args": {}
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "routing_current_time",
+        "difficulty": "easy",
+        "what_it_tests": "Hỏi giờ hiện tại -> current_time, không phải lookup."
+      },
+      "query": "Bây giờ là mấy giờ rồi?"
+    },
+    {
+      "id": "N02_current_time_timezone",
+      "phase": "B",
+      "suite": "extension",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "current_time",
+            "args": {
+              "timezone": "America/New_York"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "arg_timezone",
+        "difficulty": "medium",
+        "what_it_tests": "Nêu rõ múi giờ New York -> timezone=America/New_York."
+      },
+      "query": "Bây giờ ở New York là mấy giờ?"
+    },
+    {
+      "id": "N03_extract_links_from_pasted_text",
+      "phase": "B",
+      "suite": "extension",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "extract_links",
+            "args": {}
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "routing_extract_links",
+        "difficulty": "medium",
+        "what_it_tests": "Đoạn văn có nhiều link và yêu cầu liệt kê -> extract_links."
+      },
+      "query": "Liệt kê giúp mình các link có trong đoạn này: 'Xem https://openai.com/blog/a và https://blog.google/gemini, cả www.anthropic.com/news nữa.'"
+    },
+    {
+      "id": "N04_single_url_is_fetch_not_extract",
+      "phase": "B",
+      "suite": "extension",
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "fetch",
+            "args": {
+              "url": "https://example.com/post"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "boundary_fetch_vs_extract",
+        "difficulty": "medium",
+        "what_it_tests": "Chỉ một link và muốn đọc nội dung -> fetch, KHÔNG phải extract_links."
+      },
+      "query": "Đọc giúp mình link này: https://example.com/post"
+    },
+    {
+      "id": "N05_cite_apa",
+      "phase": "B",
+      "suite": "extension",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "cite_source",
+            "args": {
+              "style": "apa",
+              "url": "https://openai.com/blog/gpt-5"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "arg_style_apa",
+        "difficulty": "medium",
+        "what_it_tests": "Yêu cầu APA -> cite_source style=apa và url đúng."
+      },
+      "query": "Tạo trích dẫn APA cho bài 'GPT-5 Launch' của OpenAI ngày 2026-01-05, link https://openai.com/blog/gpt-5"
+    },
+    {
+      "id": "N06_cite_missing_url",
+      "phase": "B",
+      "suite": "extension",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "clarify_missing_url_for_cite",
+        "difficulty": "medium",
+        "what_it_tests": "Muốn trích dẫn nhưng không có link -> hỏi lại, không tự bịa URL."
+      },
+      "query": "Trích dẫn giúp mình bài báo về GPT-5 của OpenAI."
+    },
+    {
+      "id": "N07_cite_after_clarify",
+      "phase": "B",
+      "suite": "extension",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "cite_source",
+            "args": {
+              "url": "https://openai.com/blog/gpt-5"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_cite_fill",
+        "difficulty": "medium",
+        "what_it_tests": "2 lượt: lượt 1 thiếu link, lượt 2 bổ sung -> cite_source với đúng url."
+      },
+      "turns": [
+        {
+          "role": "user",
+          "content": "Trích dẫn giúp mình bài này"
+        },
+        {
+          "role": "user",
+          "content": "Link là https://openai.com/blog/gpt-5, tiêu đề GPT-5 Launch, tác giả OpenAI"
+        }
+      ]
+    }
+  ]
+}

@@ -130,3 +130,31 @@ tools:
               source: {type: string}
               summary: {type: string}
       required: [items]
+
+  - name: current_time
+    description: "Cho biết ngày, giờ và thứ HIỆN TẠI theo một múi giờ. DÙNG KHI: người dùng hỏi bây giờ là mấy giờ, hôm nay là ngày/thứ mấy, hoặc cần ghi ngày hôm nay vào bản tin. KHÔNG DÙNG để tìm tin tức (dùng lookup) hay khi người dùng đã nêu rõ ngày."
+    parameters:
+      type: object
+      properties:
+        timezone: {type: string, default: "Asia/Ho_Chi_Minh", description: "Múi giờ IANA (ví dụ 'Asia/Ho_Chi_Minh', 'America/New_York') hoặc 'UTC+7'. Mặc định giờ Việt Nam."}
+      required: []
+
+  - name: extract_links
+    description: "Rút các đường link (URL) ra từ MỘT ĐOẠN VĂN BẢN người dùng dán vào (email, ghi chú, đoạn chat), bỏ link trùng. DÙNG KHI: người dùng muốn liệt kê/gom các link có trong đoạn văn. KHÔNG DÙNG khi người dùng chỉ đưa một link và muốn đọc nội dung (dùng fetch)."
+    parameters:
+      type: object
+      properties:
+        text: {type: string, default: "", description: "Nguyên văn đoạn văn bản chứa các link; chép đúng như người dùng đã dán."}
+      required: [text]
+
+  - name: cite_source
+    description: "Tạo MỘT dòng trích dẫn nguồn (markdown, APA đơn giản hoặc plain) từ thông tin người dùng đã cho. DÙNG KHI: người dùng muốn ghi nguồn/trích dẫn cho một bài đã biết link. KHÔNG DÙNG để tìm hay đọc bài (dùng lookup hoặc fetch) và không kiểm chứng thông tin; thiếu link thì hỏi lại bằng clarify."
+    parameters:
+      type: object
+      properties:
+        title: {type: string, default: "", description: "Tiêu đề bài viết."}
+        url: {type: string, default: "", description: "Link đầy đủ (http/https) của nguồn."}
+        author: {type: string, default: "", description: "Tác giả hoặc tổ chức (tùy chọn)."}
+        date: {type: string, default: "", description: "Ngày đăng, ví dụ '2026-01-05' (tùy chọn)."}
+        style: {type: string, enum: [markdown, apa, plain], default: "markdown", description: "Kiểu trích dẫn: 'apa' khi người dùng yêu cầu APA, 'markdown' mặc định."}
+      required: [url]

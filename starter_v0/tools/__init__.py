@@ -18,6 +18,9 @@ from .social_search.tool import search_tweets
 from .send.tool import send_telegram
 from .lookup.tool import web_search
 from .dedupe.tool import dedupe_items
+from .current_time.tool import get_current_time
+from .extract_links.tool import extract_links_from_text
+from .cite_source.tool import format_citation
 
 
 # NOTE (starter_v0): tool names here are intentionally vague. These keys are the
@@ -37,6 +40,9 @@ TOOL_FUNCTIONS = {
     "papers": arxiv_search,
     "paper_text": get_arxiv_paper_text,
     "dedupe": dedupe_items,
+    "current_time": get_current_time,
+    "extract_links": extract_links_from_text,
+    "cite_source": format_citation,
 }
 
 

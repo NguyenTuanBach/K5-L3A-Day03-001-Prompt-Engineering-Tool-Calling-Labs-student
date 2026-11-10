@@ -43,6 +43,9 @@ Research agent: tìm tin tức trên web, tìm bài đăng X/Twitter theo từ k
 | papers | tìm bài báo khoa học trên arXiv | không |
 | paper_text | tải PDF arXiv và trích nội dung text | không |
 | **dedupe** | loại các item trùng lặp (cùng URL hoặc cùng tiêu đề) trước khi tạo bản tin | **có** |
+| **current_time** | cho biết ngày, giờ, thứ hiện tại theo múi giờ (mặc định giờ Việt Nam) | **có** |
+| **extract_links** | rút các đường link ra từ một đoạn văn bản người dùng dán vào, bỏ link trùng | **có** |
+| **cite_source** | tạo một dòng trích dẫn nguồn (markdown, APA đơn giản hoặc plain) | **có** |
 
 ## A3. Câu hỏi mẫu để thử
 
@@ -76,6 +79,7 @@ Research agent: tìm tin tức trên web, tìm bài đăng X/Twitter theo từ k
 | v9 | `system_prompt.md` | Không suy ra tài khoản từ chủ đề của lượt trước (lỗi thấy ở chat live) | group 1.00 | group 1.00, base 1.00; live lượt 2 hỏi lại | `runs/v9_B_base_openai_20261110T103330500469.json` |
 | v10 | `system_prompt.md` + `tools/fetch` | Mặc định trả lời tiếng Việt; `fetch` tải trực tiếp khi Firecrawl lỗi | base/group 1.00 | base 1.00, group 1.00 | `runs/v10_B_base_openai_20261110T111153364010.json` |
 | v11 | `system_prompt.md` | Áp dụng đơn vị/thang đo mà nguồn nêu (ĐVT 1 = 1.000 vnđ) | base/group 1.00 | base 1.00, group 1.00; live đúng 3/3 lần | `runs/v11_B_base_openai_20261110T113023208318.json` |
+| v12 | `tools.yaml` (+3 tool) | Thêm `current_time`, `extract_links`, `cite_source` (14 tool) không gây regression và được route đúng | base/group 1.00 | base 1.00, group 1.00, new-tools 1.00 (7/7) | `runs/v12_B_extension_openai_20261110T115859424557.json` |
 
 Độ dao động: v5 chạy thêm 2 lần (`v5-rerun1/2`) đều 20/20. v7 chạy thêm 2 lần đều giữ group 0.90 với G09 fail (lỗi ổn định, không phải nhiễu). Lưu ý: ở v1, R03 và R13 tự pass dù không sửa gì liên quan đến chúng; nhóm coi đó là nhiễu giữa các lần chạy và **không** tính là tác dụng của v1.
 
@@ -149,10 +153,10 @@ Lưu ý: ở v9 lượt 2, agent hỏi lại bằng text chứ không gọi tool
 | send (Telegram) | `transcripts/v8_...`, `v9_...` (lượt 4); `eval_group.json` G05, G08, G09 | Agent không gửi khi chưa xác nhận, gửi `confirmed=true` khi đã xác nhận, không hỏi lại khi người dùng hủy | **Chưa gửi thật lên Telegram** (nhóm chưa tạo bot), nên chỉ có bằng chứng về hành vi hỏi/không hỏi, không có bằng chứng tin nhắn đã được gửi |
 | arXiv/company policy | `eval_group.json` G03, G10 | `policy` và `papers` được route đúng | Chỉ kiểm tra routing, chưa kiểm tra chất lượng nội dung trả về |
 | UI | `app.py`, `.streamlit/config.toml` | Streamlit chạy local, tự thử lại khi mạng rớt, ẩn/hiện chi tiết tool, lưu transcript cùng định dạng | Link tunnel là tạm thời, mất khi tắt `cloudflared`; ai có link đều dùng credit key của nhóm |
-| Tool mới `dedupe` | `tools/dedupe/`, `tests/test_tools_todo.py` | Loại tin trùng URL (bỏ `www.`, `#fragment`, `utm_*`) hoặc trùng tiêu đề; có G01 kiểm tra routing | Nhóm chỉ thêm **1** tool mới nên **chưa** đạt điều kiện "hơn 3 tool" của điểm thưởng |
-| Tool unit tests (`tests/`) | `pytest`: **128 passed, 0 skipped** | Điền hết các stub; 6 test cho `dedupe`; 8 test cho nhánh dự phòng của `fetch`; 24 test cho `papers`, `paper_text` và vòng lặp agent (`tests/test_papers_and_agent_loop.py`) | Test chạy offline, HTTP được mock, các lệnh chờ 3 giây của arXiv được tắt trong test |
+| 4 tool mới: `dedupe`, `current_time`, `extract_links`, `cite_source` | `tools/<tên>/` (tool.py + TOOL.md), `data/eval_new_tools.json`, `runs/v12_B_extension_...json` | Mỗi tool có TOOL.md, đăng ký trong registry và `tools.yaml`, unit test, và eval kiểm tra routing/args (G01 cho `dedupe`; N01 đến N07 cho 3 tool còn lại, 7/7 đạt) | Đạt điều kiện "hơn 3 tool mới" (4 tool) cùng với UI để nhận điểm thưởng. Lưu ý: eval ép model phải gọi tool (`tool_choice=required`), nên khi chat thật model vẫn có thể tự trả lời thay vì gọi `current_time` |
+| Tool unit tests (`tests/`) | `pytest`: **181 passed, 0 skipped** | Điền hết các stub; 6 test cho `dedupe`; 8 test cho nhánh dự phòng của `fetch`; 24 test cho `papers`, `paper_text` và vòng lặp agent (`tests/test_papers_and_agent_loop.py`) | Test chạy offline, HTTP được mock, các lệnh chờ 3 giây của arXiv được tắt trong test |
 
-**Tool unit tests, chi tiết.** Trước: 62 passed, 17 skipped. Sau: 128 passed, 0 skipped.
+**Tool unit tests, chi tiết.** Trước: 62 passed, 17 skipped. Sau: 181 passed, 0 skipped (gồm 37 test cho `current_time`, `extract_links`, `cite_source` trong `tests/test_new_tools.py`).
 
 - **Bug tìm được trong tool có sẵn (2):**
   1. `timeline` và `social_search` nhận `limit` âm sẽ cắt `items[:-n]` và âm thầm bỏ các bài cuối (`limit=-3` chỉ trả về 1 trên 4 bài). Test được viết trước và fail 4 case, sau đó sửa `_tweets_from` để `limit < 1` quay về mặc định 5. Test được giữ lại làm regression test.
@@ -166,7 +170,7 @@ Lưu ý: ở v9 lượt 2, agent hỏi lại bằng text chứ không gọi tool
 - **Which fixes belonged in `system_prompt.md`?** Hành vi và thứ tự ưu tiên: bỏ ba chỉ dẫn xấu (v1), xin xác nhận trước khi gửi và các ngoại lệ (v3, v7, v8), rule routing và quy tắc đổi nguồn (v5), không suy ra tài khoản từ ngữ cảnh (v9), ngôn ngữ trả lời (v10), áp dụng đơn vị của nguồn (v11). Các lỗi kiểu "agent làm sai việc" và "sai thứ tự" đều nằm ở prompt.
 - **Which fixes belonged in `tools.yaml`?** Các lỗi kiểu "gọi đúng tool nhưng sai tham số": mô tả `response_type` (v2), quy ước args như handle không có `@`, `topic=news`, `timeframe`, `search_type`, mô tả `send` với `confirmed=true` (v4), và khai báo tool mới `dedupe` (v6).
 - **Which failure needed manual review instead of automatic grading?** (1) Việc đọc sai đơn vị giá vàng (13,700 thay vì 13.700.000): eval chỉ chấm tên tool và args nên hoàn toàn không thấy lỗi này, chỉ phát hiện khi đọc câu trả lời thật. (2) Hỏi lại bằng text so với gọi `clarify`: người dùng thấy giống nhau, eval chấm khác nhau. (3) Lỗi đoán tài khoản chỉ lộ ra khi chat nhiều lượt có ngữ cảnh, trong khi R10 đơn lượt vẫn pass.
-- **What would we improve next?** Thêm eval case kiểm tra số liệu và đơn vị; chạy mỗi version nhiều lần để tách nhiễu khỏi tác dụng thật (v4 tụt điểm nhưng nhóm chưa chứng minh được là do thay đổi hay do nhiễu, chỉ biết v5 sửa được); thêm ít nhất 3 tool nữa để đạt điều kiện điểm thưởng; thử gửi Telegram thật; và thử model local.
+- **What would we improve next?** Thêm eval case kiểm tra số liệu và đơn vị; chạy mỗi version nhiều lần để tách nhiễu khỏi tác dụng thật (v4 tụt điểm nhưng nhóm chưa chứng minh được là do thay đổi hay do nhiễu, chỉ biết v5 sửa được); thử gửi Telegram thật; và thử model local.
 
 Hạn chế cần nêu: chỉ dùng một model (`gpt-4o-mini`); bộ 30 case còn nhỏ nên 1.00 không có nghĩa agent đúng trên mọi tình huống; mỗi cấu hình chạy rất ít lần.
 
